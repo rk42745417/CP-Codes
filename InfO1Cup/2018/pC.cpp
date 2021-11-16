@@ -1,3 +1,4 @@
+// 15/100
 #include "grader.h"
 #include <bits/stdc++.h>
 using namespace std;

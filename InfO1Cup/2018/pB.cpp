@@ -1,3 +1,4 @@
+// 30/100
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -38,7 +39,7 @@ bool solve() {
 			l = i + 1;
 			continue;
 		}
-		vector<int> arr, owo, split, init;
+		vector<int> arr, owo, split;
 		for(int j = l, it = j; j <= i; j++) {
 			if(j == i) {
 				arr.push_back(j - it);
@@ -54,58 +55,23 @@ bool solve() {
 		}
 		if(arr.size() == 1)
 			return false;
-		int x = 0;
-		for(int a : arr)
-			x ^= (a & 1);
-		if(x)
-			return false;
-		init = arr;
-		//cout << "start\n";
-		for(int i = 0; i + 1 < arr.size(); i++) {
-			if(init[i] <= 2) {
-				if(arr[i + 1] < arr[i])
-					return false;
-				while(arr[i]) {
-					ope2.push_back(split[i]);
-					arr[i]--;
-					arr[i + 1]--;
-				}
-			}
-			else {
-				if(arr[i] & 1) {
-					ope2.push_back(split[i]);
-					arr[i]--;
-					arr[i + 1]--;
-				}
-				if(init[i + 1] <= 2 && arr[i] >= 2 && arr[i + 1] % 2 == arr[i] % 2) {
-					while(arr[i + 1]) {
-						ope2.push_back(split[i]);
-						arr[i]--;
-						arr[i + 1]--;
-					}
-				}
-				if(init[i] == arr[i]) {
-					if(arr[i + 1] < 2)
-						return false;
-					ope2.push_back(split[i]);
-					arr[i]--;
-					arr[i + 1]--;
-					ope2.push_back(split[i]);
-					arr[i]--;
-					arr[i + 1]--;
-				}
-			}
-		}
+		vector<vector<int>> dp(arr.size(), vector<int>(3, -1));
+		dp[0][arr[0] % 2 + 2 * (arr[0] > 1)] = 0;
 		for(int i = 0; i < arr.size(); i++) {
-			if(arr[i]) {
-				if(arr[i] % 2 || init[i] <= 2 || arr[i] == init[i])
-					return false;
-				while(arr[i]) {
-					ope1.push_back(owo[i]);
-					arr[i] -= 2;
-				}
+			if(arr[i] >= 3 && ~dp[i][2]) {
+				dp[i][0] = INF;
+			}
+			if(i + 1 == arr.size())
+				break;
+			for(int j = 0; j < 3; j++) {
+				if(dp[i][j] == -1)
+					continue;
+				int g = arr[i + 1] - j;
 			}
 		}
+		if(arr.back()[0] == -1)
+			return false;
+		int a = arr.size() - 1, b = 0;
 		l = i + 1;
 	}
 	for(int a : ope2)
