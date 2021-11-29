@@ -1,1 +1,1 @@
-Not all codes are AC codes, the score is shown on the top of code.
+並非 code 都是 AC 解，如果 OI 賽制比賽的 code 會在最頂端打上所拿到的分數。
