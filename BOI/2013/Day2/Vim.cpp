@@ -1,4 +1,4 @@
-// 60/100
+// 100/100
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -16,47 +16,63 @@ static auto LamyIsCute = []() {
 	return 48763;
 }();
 
-const int N = 5000;
-int dp[N][N];
+const int N = 70007, M = 11;
+int dp[N][M][M], ans[N][M];
 signed main() {
-	memset(dp, 0x3f, sizeof dp);
-	dp[0][0] = 0;
 	int n;
 	string s;
 	cin >> n >> s;
-	vector<vector<int>> nxt(n, vector<int>(10, INF));
-	for(int i = n - 2; ~i; i--) {
-		for(int j = 0; j < 10; j++)
-			nxt[i][j] = nxt[i + 1][j];
-		if(s[i + 1] != 'e')
-			nxt[i][s[i + 1] - 'a'] = i + 1;
-	}
-	for(int i = 0; i < n; i++) {
-		int mn = -1, cnt = 0;
-		for(int j = 0; j < n; j++) {
-			if(j > i && s[j] == 'e') {
-				if(mn == -1)
-					mn = j;
+	s += 'k';
+	n++;
+	int cnt = 0;
+	vector<bool> has;
+	{
+		string t;
+		bool nxt = false;
+		for(int i = 0; i < n; i++) {
+			if(s[i] == 'e') {
+				nxt = true;
 				cnt++;
 			}
-			if(dp[i][j] == INF)
-				continue;
-			if(i + 1 < n && s[i + 1] != 'e')
-				dp[i + 1][j] = min(dp[i + 1][j], dp[i][j]);
-			if(i < j && mn != -1)
-				dp[j][mn] = min(dp[j][mn], dp[i][j] + (j - mn) + cnt);
-			int r = INF;
-			for(int k = 0; k < 10; k++) {
-				r = min(r, nxt[j][k]);
-				if(nxt[j][k] != INF)
-					dp[i][nxt[j][k]] = min(dp[i][nxt[j][k]], dp[i][j] + 2);
+			else {
+				t.push_back(s[i] - 'a');
+				has.push_back(nxt);
+				nxt = false;
 			}
-			if(r != INF && j <= i && s[j] == 'e')
-				dp[i][r] = min(dp[i][r], dp[i][j]);
+		}
+		s = t;
+		n = s.size();
+	}
+	memset(dp, 0x3f, sizeof dp);
+	memset(ans, 0x3f, sizeof ans);
+	ans[0][s[0]] = 0;
+	
+	for(int i = 1; i < n; i++) {
+		for(int j = 0; j < M; j++) {
+			{
+				int &w = ans[i][j];
+				w = min(w, ans[i - 1][s[i - 1]] + 2);
+				w = min(w, dp[i - 1][s[i - 1]][s[i - 1]] + 2);
+				if(j != s[i - 1]) {
+					if(!has[i - 1])
+						w = min(w, ans[i - 1][j]);
+					w = min(w, dp[i - 1][s[i - 1]][j]);
+				}
+			}
+			for(int k = 0; k < M; k++) {
+				int &w = dp[i][j][k];
+				w = min(w, ans[i - 1][s[i - 1]] + 5);
+				w = min(w, dp[i - 1][s[i - 1]][s[i - 1]] + 5);
+				if(j != s[i - 1]) {
+					w = min(w, ans[i - 1][j] + 3);
+					w = min(w, dp[i - 1][j][s[i - 1]] + 3);
+				}
+				if(k != s[i - 1])
+					w = min(w, dp[i - 1][s[i - 1]][k] + 3);
+				if(j != s[i - 1] && k != s[i - 1])
+					w = min(w, dp[i - 1][j][k] + 1);
+			}
 		}
 	}
-	int mn = INF;
-	for(int i = 0; i < n; i++)
-		mn = min(mn, dp[n - 1][i]);
-	cout << mn << '\n';
+	cout << cnt * 2 + ans[n - 1][M - 1] - 2 << '\n';
 }
