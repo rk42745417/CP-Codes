@@ -1,4 +1,4 @@
-// 34/100
+// 100/100
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -16,41 +16,62 @@ static auto LamyIsCute = []() {
 	return 48763;
 }();
 
+int t = 1;
+
+/*
+ * arr: The constraints
+ * can_have_zero: Can solve() return 0?
+ */
+ll solve(vector<int> arr, bool can_have_zero) {
+	if(!accumulate(arr.begin(), arr.end(), 0))
+		return !can_have_zero;
+	if(arr.size() == 1) {
+		if(arr[0] == 1)
+			return 10;
+		int w = 0;
+		for(int i = 1; i < 10; i++) {
+			if(arr[0] >> i & 1) {
+				w = w * 10 + i;
+			}
+			if(w > 0 && (arr[0] & 1)) {
+				w *= 10;
+				arr[0] ^= 1;
+			}
+		}
+		return w;
+	}
+	ll res = LINF;
+	for(int i = 0; i < 10; i++) {
+		vector<int> brr;
+		bool r = can_have_zero || i; // If i != 0, then solve() will not return zero. So the next solve can return zero.
+		for(int j = 0, cur = 0; j < arr.size(); j++) {
+			int w = (i + j) % 10;
+			int k = arr[j];
+			if(k >> w & 1) {
+				k ^= 1 << w;
+				if(w == 0 && brr.empty()) // IF 0 is used to satisfy the constraint, and it is at the first term, then the next solve() can not return zero.
+					r = 0;
+			}
+			cur |= k; // Merge the constraints
+
+			if(w == 9 || j + 1 == arr.size()) {
+				brr.push_back(cur);
+				cur = 0;
+			}
+		}
+		if(i == 9 && arr.size() == 2 && arr == brr) {
+			continue; // Prevent infinite loop
+		}
+		res = min(res, solve(brr, r) * 10 + i);
+	}
+	return res;
+}
+
 signed main() {
-	int n;
-	cin >> n;
-	vector<int> arr(n);
-	for(int &a : arr)
-		cin >> a;
-	bool sol = 1;
-	for(int i = 1; i < n; i++)
-		if(arr[i] != arr[i - 1])
-			sol = 0;
-	if(sol) {
-		int mn = 0;
-		for(int i = 1; ; i++) {
-			auto t = to_string(i);
-			bool ok = 0;
-			for(char c : t)
-				ok |= c - '0' == arr[0];
-			if(!ok)
-				mn = max(mn, i + n);
-			if(i >= n && mn <= i)
-				return cout << i - n + 1 << '\n', 0;
-		}
-	}
-	for(int i = 1; ; i++) {
-		bool ok = 1;
-		for(int j = 0; j < n; j++) {
-			auto t = to_string(j + i);
-			bool res = 0;
-			for(char c : t)
-				res |= c - '0' == arr[j];
-			ok &= res;
-		}
-		if(ok) {
-			cout << i << '\n';
-			break;
-		}
-	}
+	int k;
+	cin >> k;
+	vector<int> arr(k);
+	for(int i = 0; i < k; i++)
+		cin >> arr[i], arr[i] = 1 << arr[i];
+	cout << solve(arr, 0) << '\n';
 }
