@@ -1,4 +1,4 @@
-// 81/100
+// 100/100
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -56,15 +56,10 @@ signed main() {
 	vector<bool> vis(n);
 	ll r = 0;
 	map<int, int> owo;
-	auto solve = [&](int a, int b) {
-		const int sz = a + b;
-		if(sz % 2)
-			return ll(0);
+	auto solve = [&](int k) {
 		ll r = 0;
-		ll g = fac[n - sz] * fac[a] % MOD * fac[b] % MOD;
-		for(int j = 1; j <= n - a - b + 1; j++)
-			r = (r + g * j % MOD * cnm(n - j, a + b - 1)) % MOD;
-		return r;
+		ll g = fac[n - k] * fac[k / 2] % MOD * fac[k / 2] % MOD;
+		return g * (cnm(n, k) + cnm(n, k + 1)) % MOD;
 	};
 	for(int i = 0; i < n; i++) {
 		if(vis[i])
@@ -75,13 +70,11 @@ signed main() {
 			vis[x] = true;
 			x = arr[x];
 		}
-		const int a = (sz + 1) / 2, b = sz / 2;
-		if(a && b && (a + b) % 2 == 0) {
-			owo[a]++;
-		}
+		owo[sz]++;
 	}
 	for(const auto &[x, c] : owo) {
-		r = (r + c * 2 * solve(x, x)) % MOD;
+		if(x % 2 == 0)
+			r = (r + c * 2 * solve(x)) % MOD;
 	}
 	cout << (ans + r) % MOD << '\n';
 }
