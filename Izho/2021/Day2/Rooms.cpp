@@ -1,4 +1,4 @@
-// 40/100
+// 100/100
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -16,60 +16,68 @@ static auto LamyIsCute = []() {
 	return 48763;
 }();
 
+const int N = 1e6 + 25;
+struct segtree {
+	int arr[N << 1], tag[N], n;
+	void init(int _n) { n = _n; }
+	void upd(int p, int v) {
+		arr[p] = max(arr[p], v);
+		if(p < n)
+			tag[p] = max(tag[p], v);
+	}
+	void push(int p) {
+		for(int h = __lg(p); ~h; h--) {
+			int i = p >> h;
+			if(tag[i >> 1]) {
+				upd(i, tag[i >> 1]);
+				upd(i ^ 1, tag[i >> 1]);
+				tag[i >> 1] = 0;
+			}
+		}
+	}
+	void edt(int l, int r, int v) {
+		for(l += n, r += n; l < r; l >>= 1, r >>= 1) {
+			if(l & 1)
+				upd(l++, v);
+			if(r & 1)
+				upd(--r, v);
+		}
+	}
+	int que(int p) {
+		push(p += n);
+		return arr[p];
+	}
+} tree;
 signed main() {
 	int n;
 	cin >> n;
-	vector<int> arr(n);
-	for(int &a : arr)
-		cin >> a;
-	vector<int> brr(n + 1);
-	for(int &a : brr)
-		cin >> a;
-	bool test = 0;
-	if(n > 5000 || test) {
-		if(*max_element(arr.begin(), arr.end()) == 0) {
-			vector<int> mx(n);
-			mx[n - 1] = brr[n];
-			for(int i = n - 2; ~i; i--)
-				mx[i] = max(mx[i + 1], brr[i + 1]);
-			for(int i = 0, m = brr[0]; i < n; i++) {
-				cout << min(m, mx[i]) << " \n"[i == n - 1];
-				m = max(m, brr[i + 1]);
-			}
-		}
-		else if(*max_element(brr.begin(), brr.end()) <= 100) {
-			
-		}
-		else {
-			for(int i = 0; i < n; i++)
-				cout << max<ll>(0, brr[i] - arr[i]) << " \n"[i == n - 1];
-		}
-		return 0;
-	}
-	vector<bool> vis(n);
+	vector<int> arr(n), brr(n + 1);
+	vector<ll> sum(n);
 	for(int i = 0; i < n; i++) {
-		fill(vis.begin(), vis.end(), false);
-
-		ll cur = arr[i], ans = 0;
-		int l = i, r = i;
-		while(0 <= l && r < n) {
-			if(brr[l] < brr[r + 1]) {
-				ll x = max<ll>(brr[l] - cur, 0);
-				ans += x;
-				cur += x;
-				l--;
-				if(0 <= l)
-					cur += arr[l];
-			}
-			else {
-				ll x = max<ll>(brr[r + 1] - cur, 0);
-				ans += x;
-				cur += x;
-				r++;
-				if(r < n)
-					cur += arr[r];
-			}
-		}
-		cout << ans << " \n"[i == n - 1];
+		cin >> arr[i];
+		sum[i] = arr[i];
+		if(i)
+			sum[i] += sum[i - 1];
 	}
+	for(int i = 0; i <= n; i++)
+		cin >> brr[i];
+	auto cost = [&](int l, int r) {
+		return max<ll>(0, min(brr[l], brr[r + 1]) - sum[r] + (l ? sum[l - 1] : 0));
+	};
+
+	tree.init(n);
+	stack<int> owo;
+	owo.push(0);
+	for(int i = 0; i < n; i++) {
+		int x = brr[i + 1];
+		while(!owo.empty() && brr[owo.top()] < x) {
+			tree.edt(owo.top(), i + 1, cost(owo.top(), i));
+			owo.pop();
+		}
+		if(!owo.empty())
+			tree.edt(owo.top(), i + 1, cost(owo.top(), i));
+		owo.push(i + 1);
+	}
+	for(int i = 0; i < n; i++)
+		cout << tree.que(i) << " \n"[i == n - 1];
 }
