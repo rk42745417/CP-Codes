@@ -1,83 +1,89 @@
-// ?/100
+// 100/100
+/*
+--------------              |   /
+      |                     |  /
+      |                     | /
+      |             *       |/          |    |         ------            *
+      |                     |           |    |        /      \
+      |             |       |\          |    |       |       |\          |
+   \  |             |       | \         |    |       |       | \         |
+    \ |             |       |  \        |    |        \     /   \        |
+     V              |       |   \        \__/|         -----     \       |
+*/
 #include <bits/stdc++.h>
 using namespace std;
 
-//#pragma GCC optimize("avx2")
-//#pragma GCC optimize("unroll-loops")
-
-#define EMT ios::sync_with_stdio(0); cin.tie(0);
+#define EmiliaMyWife ios::sync_with_stdio(0); cin.tie(NULL);
 using ll = int64_t;
-using uint = uint32_t;
 using ull = uint64_t;
 using ld = long double;
-const int MOD = 1e9 + 7;
-const int INF = 0x3f3f3f3f;
-const ll LINF = 4e18;
-const double EPS = 1e-9;
+using uint = uint32_t;
+const double EPS  = 1e-8;
+const int INF     = 0x3F3F3F3F;
+const ll LINF     = 4611686018427387903;
+const int MOD     = 1e9+7;
+/*--------------------------------------------------------------------------------------*/
 
 struct dat {
-	int u, lst;
-	bool has;
-	friend bool operator<(const dat &a, const dat &b) { return a.u < b.u; }
+	int v, c;
+	ll p;
+	bool operator<(const dat &b) { return c < b.c; }
 };
-const int N = 1001;
-ll dis[N][N * 2][2], tot[N * 2], col[N * 2], pri[N * 2];
-int cnt[N * 2];
-vector<pair<int, int>> edge[N];
 
-signed main() { EMT
+signed main() { EmiliaMyWife
 	int n, m;
 	cin >> n >> m;
+	vector<vector<dat>> edge(n + 1), nwedge(n + 1);
+	set<pair<int, int>> has;
+	vector<ll> dis(n + 1, LINF), sum(m + 1);
 	for(int i = 0, a, b, c, d; i < m; i++) {
 		cin >> a >> b >> c >> d;
-		edge[a].push_back({b, i});
-		edge[b].push_back({a, i});
-		pri[i] = d;
-		col[i] = c;
+		edge[a].push_back({b, c, d});
+		edge[b].push_back({a, c, d});
 	}
-	memset(dis, 0x3f, sizeof dis);
-	dis[1][0][0] = 0;
-	priority_queue<pair<ll, dat>, vector<pair<ll, dat>>, greater<pair<ll, dat>>> pq;
-	pq.push({0, {1, 0, 0}});
-	ll ans = LINF;
-
+	for(int i = 1; i <= n; i++) {
+		for(const auto &[v, c, p] : edge[i])
+			sum[c] += p;
+		for(const auto &[v, c, p] : edge[i])
+			nwedge[i].push_back({v, c, sum[c] - p});
+		for(const auto &[v, c, p] : edge[i])
+			sum[c] -= p;
+		sort(nwedge[i].begin(), nwedge[i].end());
+	}
+	dis[1] = 0;
+	priority_queue<pair<ll, int>, vector<pair<ll, int>>, greater<pair<ll, int>>> pq;
+	pq.push({0, 1});
 	while(!pq.empty()) {
-		const auto [c, u] = pq.top();
-		//cerr << "here " << c << ' ' << u.u << ' ' << u.lst << ' ' << u.has << '\n';
+		const auto [d, u] = pq.top();
 		pq.pop();
-		if(c > dis[u.u][u.lst][u.has])
+		if(d > dis[u])
 			continue;
-
-		if(u.u == n)
-			ans = min(ans, c);
-		
-		for(const auto &[v, id] : edge[u.u])
-			cnt[col[id]]++, tot[col[id]] += pri[id];
-		if(u.has)
-			cnt[col[u.lst]]--, tot[col[u.lst]] -= pri[u.lst];
-
-		for(const auto &[v, id] : edge[u.u]) {
-			ll w = 0, has = 0;
-			if(cnt[col[id]] > 1)
-				w = pri[id], has = 1;
-
-			if(dis[v][id][has] > c + w) {
-				dis[v][id][has] = c + w;
-				pq.push({dis[v][id][has], {v, id, has}});
+		for(const auto &[v, c, p] : edge[u]) {
+			if(dis[v] > dis[u] + p) {
+				dis[v] = dis[u] + p;
+				pq.push({dis[v], v});
 			}
-
-			has = 0;
-			w = max<ll>(0, tot[col[id]] - pri[id]);
-			if(dis[v][id][0] > c + w) {
-				dis[v][id][0] = c + w;
-				pq.push({dis[v][id][0], {v, id, 0}});
+			if(has.count(make_pair(v, c)))
+				continue;
+			has.insert({v, c});
+			int it = lower_bound(nwedge[v].begin(), nwedge[v].end(), (dat){-1, c, -1}) - nwedge[v].begin();
+			while(it < nwedge[v].size() && nwedge[v][it].c == c) {
+				if(dis[nwedge[v][it].v] > dis[u] + nwedge[v][it].p) {
+					dis[nwedge[v][it].v] = dis[u] + nwedge[v][it].p;
+					pq.push({dis[nwedge[v][it].v], nwedge[v][it].v});
+				}
+				it++;
 			}
 		}
-		for(const auto &[v, id] : edge[u.u])
-			cnt[col[id]] = 0, tot[col[id]] = 0;
+		for(const auto &[v, c, p] : nwedge[u]) {
+			if(dis[v] > dis[u] + p) {
+				dis[v] = dis[u] + p;
+				pq.push({dis[v], v});
+			}
+		}
 	}
-	if(ans > 1e16)
-		cout << "-1\n";
+	if(dis[n] != LINF)
+		cout << dis[n] << '\n';
 	else
-		cout << ans << '\n';
+		cout << "-1\n";
 }
