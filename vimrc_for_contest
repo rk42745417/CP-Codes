@@ -1,3 +1,4 @@
+" Vimrc for contest
 set cb=unnamedplus,unnamed
 set ts=4
 set sw=4
@@ -11,7 +12,7 @@ set rnu
 syntax enable
 colo pablo
 
-autocmd filetype cpp nnoremap <F9> :w <bar> !g++ -std=c++17 % -o %:r -Wall -Wconverion -Wextra -Wshadow -fsanitize=undefined -fsanitize=address<CR>
+autocmd filetype cpp nnoremap <F9> :w <bar> !g++ -std=c++17 % -o %:r -Wall -Wconversion -Wextra -Wshadow -fsanitize=undefined -fsanitize=address<CR>
 autocmd filetype cpp nnoremap <F10> :!./%:r<CR>
 
 inoremap { {}<Left>

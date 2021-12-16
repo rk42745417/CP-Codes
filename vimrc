@@ -1,3 +1,5 @@
+" Vimrc for daily use
+
 " basic options
 set cb=unnamedplus,unnamed
 set ts=4 " tabstop=4
