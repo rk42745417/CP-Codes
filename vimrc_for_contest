@@ -16,6 +16,6 @@ autocmd filetype cpp nnoremap <F9> :w <bar> !g++ -std=c++17 % -o %:r -Wall -Wcon
 autocmd filetype cpp nnoremap <F10> :!./%:r<CR>
 
 inoremap { {}<Left>
-inoremap {<CR> {<CR>}<Esc>0
+inoremap {<CR> {<CR>}<Esc>O
 inoremap {{ {
 inoremap {} {}
