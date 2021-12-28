@@ -18,11 +18,11 @@ static int LamyIsCute = []() {
 
 int distinct(vector<int> s);
 
-
+vector<int> init;
 int query(int l, int r) {
 	vector<int> tmp;
 	for(int i = l; i <= r; i++)
-		tmp.push_back(i);
+		tmp.push_back(init[i - 1]);
 	return distinct(tmp);
 }
 int query2(int u, vector<int> &arr, int l, int r) {
@@ -38,11 +38,11 @@ vector<int> solve(int l, int r, int cnt) { // [l, r]
 	if(cnt == 0) {
 		vector<int> tmp;
 		for(int i = l; i <= r; i++)
-			tmp.push_back(i);
+			tmp.push_back(init[i - 1]);
 		return tmp;
 	}
 	if(l == r - 1) {
-		ans.push_back({l, r});
+		ans.push_back({init[l - 1], init[r - 1]});
 		return vector<int>();
 	}
 	int m = l + r >> 1;
@@ -62,7 +62,7 @@ vector<int> solve(int l, int r, int cnt) { // [l, r]
 	if(x.size() > y.size())
 		swap(x, y);
 	vector<int> new_x;
-	shuffle(x.begin(), x.end(), mt19937());
+	//shuffle(x.begin(), x.end(), mt19937());
 
 	for(int u : x) {
 		if(left_right == 0 || query2(u, y, 0, y.size() - 1) == y.size() + 1) {
@@ -86,6 +86,10 @@ vector<int> solve(int l, int r, int cnt) { // [l, r]
 	return new_x;
 }
 vector<pair<int, int>> train(int n) {
+	init.resize(n * 2);
+	for(int i = 0; i < n * 2; i++)
+		init[i] = i + 1;
+	shuffle(init.begin(), init.end(), mt19937());
 	solve(1, 2 * n, n);
 	return ans;
 }
