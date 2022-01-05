@@ -1,4 +1,4 @@
-// 35/100
+// 100/100
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -16,54 +16,33 @@ static auto LamyIsCute = []() {
 	return 48763;
 }();
 
+const int N = 3e5 + 25, LGN = 19;
+int anc[LGN][N], mn[LGN][N], state[N];
 signed main() {
 	int n;
 	cin >> n;
-	if(n <= 5000) {
-		vector<bool> has(n), undo_ty(n);
-		vector<int> undo(n), level(n);
-		for(int i = 0; i < n; i++) {
-			int x;
-			cin >> x;
-			if(x > 0) {
-				has[i] = true;
-				undo[i] = x;
-			}
-			else {
-				level[i] = -x;
-				undo_ty[i] = true;
-				has[i] = true;
-				for(int j = i; ~j; j--) {
-					if(has[j] && level[j] < level[i]) {
-						undo[i] = j;
-						break;
-					}
-				}
-				int x = i;
-				while(undo_ty[x]) {
-					//cerr << x << '\n';
-					x = undo[x];
-					has[x] = !has[x];
-				}
-			}
-			int g = -1;
-			for(int j = i; ~j; j--)
-				if(!undo_ty[j] && has[j])
-					g = max(g, j);
-			cout << (~g ? undo[g] : 0) << '\n';
-		}
-		return 0;
-	}
-	stack<int> has;
-	has.push(0);
-	for(int i = 0; i < n; i++) {
+	for(int i = 1; i <= n; i++) {
 		int x;
 		cin >> x;
-		if(x < 0) {
-			has.pop();
+		x = -x;
+		if(x > 0) {
+			int r = i - 1;
+			for(int j = LGN - 1; ~j; j--)
+				if(mn[j][r] >= x)
+					r = anc[j][r];
+			assert(r > 0);
+			anc[0][i] = r - 1;
+			mn[0][i] = x;
 		}
-		else
-			has.push(x);
-		cout << has.top() << '\n';
+		else {
+			state[i] = -x;
+			anc[0][i] = i;
+		}
+		for(int j = 1; j < LGN; j++) {
+			anc[j][i] = anc[j - 1][anc[j - 1][i]];
+			mn[j][i] = min(mn[j - 1][i], mn[j - 1][anc[j - 1][i]]);
+		}
+
+		cout << state[anc[LGN - 1][i]] << '\n';
 	}
 }
