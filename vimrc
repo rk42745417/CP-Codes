@@ -1,4 +1,5 @@
 " Vimrc for contest
+set nocp
 set cb^=unnamedplus,unnamed
 set ts=4
 set sw=4
@@ -9,6 +10,7 @@ set is
 filetype plugin indent on
 set hls
 set rnu
+set showcmd
 syntax enable
 colo pablo
 
