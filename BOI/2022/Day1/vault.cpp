@@ -1,4 +1,3 @@
-// 5/100
 /*
 --------------              |   /
       |                     |  /
@@ -30,7 +29,7 @@ using ld = long double;
 using uint = uint32_t;
 const double EPS  = 1e-8;
 const int INF     = 0x3F3F3F3F;
-const ll LINF     = 4611686018427387903;
+const ll LINF     = 2e18;
 const int MOD     = 1e9+7;
 static int Lamy_is_cute = []() {
 	EmiliaMyWife
@@ -38,52 +37,126 @@ static int Lamy_is_cute = []() {
 }();
 /*--------------------------------------------------------------------------------------*/
 
-const int N = 1e6 + 1e3, O = N / 2;
-int a[N], b[N];
-signed main() {
-	int m; ll l;
-	cin >> m >> l;
-	vector<ll> arr(m * 2 + 1);
-	for(auto &x : arr)
-		cin >> x;
-	if(m > 100 || *max_element(arr.begin(), arr.end()) > 100)
-		return 0;
-
-	int *prv = a, *nxt = b;
-	for(int i = 0; i < N; i++)
-		prv[i] = -INF;
-	prv[O] = 0;
+const int M = 9e4 + 25;
+vector<ll> cal(vector<ll> arr) {
+	vector<ll> prv(M * 2 + 1, LINF), cur(M * 2 + 1);
+	prv[M] = 0;
+	int m = arr.size() / 2;
 	for(int i = 0; i < m; i++) {
-		int c = m - i;
+		if(!arr[i])
+			continue;
+		ll c = m - i;
 		vector<deque<int>> mx(c);
-		for(int j = N - 1; ~j; j--) {
-			int r = j % c;
-			while(!mx[r].empty() && (mx[r].front() - j) / c > arr[i])
-				mx[r].pop_front();
-			while(!mx[r].empty() && prv[mx[r].back()] + (mx[r].back() - j) / c < prv[j])
-				mx[r].pop_back();
-			mx[r].push_back(j);
-			nxt[j] = prv[mx[r].front()] + (mx[r].front() - j) / c;
+		for(int j = M * 2; ~j; j--) {
+			auto &owo = mx[j % c];
+			while(!owo.empty() && (owo.front() - j) / c > arr[i])
+				owo.pop_front();
+			while(!owo.empty() && prv[owo.back()] + (owo.back() - j) / c >= prv[j])
+				owo.pop_back();
+			owo.push_back(j);
+			cur[j] = prv[owo.front()] + (owo.front() - j) / c;
 		}
-		swap(nxt, prv);
+		swap(cur, prv);
 	}
-	for(int i = m + 1; i < m * 2 + 1; i++) {
-		int c = i - m;
+	for(int i = m + 1; i <= m * 2; i++) {
+		if(!arr[i])
+			continue;
+		ll c = i - m;
 		vector<deque<int>> mx(c);
-		for(int j = 0; j < N; j++) {
-			int r = j % c;
-			while(!mx[r].empty() && (j - mx[r].front()) / c > arr[i])
-				mx[r].pop_front();
-			while(!mx[r].empty() && prv[mx[r].back()] + (j - mx[r].back()) / c < prv[j])
-				mx[r].pop_back();
-			mx[r].push_back(j);
-			nxt[j] = prv[mx[r].front()] + (j - mx[r].front()) / c;
+		for(int j = 0; j <= M * 2; j++) {
+			auto &owo = mx[j % c];
+			while(!owo.empty() && (j - owo.front()) / c > arr[i])
+				owo.pop_front();
+			while(!owo.empty() && prv[owo.back()] + (j - owo.back()) / c >= prv[j])
+				owo.pop_back();
+			owo.push_back(j);
+			cur[j] = prv[owo.front()] + (j - owo.front()) / c;
 		}
-		swap(nxt, prv);
+		swap(cur, prv);
+	}
+	return prv;
+}
+vector<ll> cal2(vector<ll> arr) {
+	vector<ll> prv(M * 2 + 1, -LINF), cur(M * 2 + 1);
+	prv[M] = 0;
+	int m = arr.size() / 2;
+	for(int i = 0; i < m; i++) {
+		if(!arr[i])
+			continue;
+		ll c = m - i;
+		vector<deque<int>> mx(c);
+		for(int j = M * 2; ~j; j--) {
+			auto &owo = mx[j % c];
+			while(!owo.empty() && (owo.front() - j) / c > arr[i])
+				owo.pop_front();
+			while(!owo.empty() && prv[owo.back()] + (owo.back() - j) / c <= prv[j])
+				owo.pop_back();
+			owo.push_back(j);
+			cur[j] = prv[owo.front()] + (owo.front() - j) / c;
+		}
+		swap(cur, prv);
+	}
+	for(int i = m + 1; i <= m * 2; i++) {
+		if(!arr[i])
+			continue;
+		ll c = i - m;
+		vector<deque<int>> mx(c);
+		for(int j = 0; j <= M * 2; j++) {
+			auto &owo = mx[j % c];
+			while(!owo.empty() && (j - owo.front()) / c > arr[i])
+				owo.pop_front();
+			while(!owo.empty() && prv[owo.back()] + (j - owo.back()) / c <= prv[j])
+				owo.pop_back();
+			owo.push_back(j);
+			cur[j] = prv[owo.front()] + (j - owo.front()) / c;
+		}
+		swap(cur, prv);
+	}
+	return prv;
+}
+signed main() {
+	int m;
+	ll l;
+	cin >> m >> l;
+
+	ll tot = 0;
+	vector<ll> has(m * 2 + 1), can(m * 2 + 1);
+	for(int i = 0; i < m * 2 + 1; i++) {
+		cin >> can[i];
+		tot += can[i] * (i - m);
+	}
+	swap(can[m], has[m]);
+	ll cur = 0;
+	if(tot < l) {
+		l = -l;
+		for(int i = 0; i < m; i++)
+			swap(can[i], can[m * 2 - i]);
+		tot = -tot;
 	}
 
-	if(l + O > N || l + O < 0 || prv[l + O] < 0)
+	for(int i = 0; i < m; i++) {
+		cur += can[i] * (i - m);
+		swap(has[i], can[i]);
+	}
+	for(int i = m + 1; i <= m * 2; i++) {
+		ll g = min(can[i], (l - cur) / (i - m));
+		cur += (i - m) * g;
+		has[i] = g;
+		can[i] -= g;
+	}
+
+	ll owo = l - cur;
+	auto dp1 = cal(has), dp2 = cal2(can);
+	ll ans = -LINF;
+	ll res = 0;
+	for(ll a : has)
+		res += a;
+
+	for(int i = 0; i + owo < dp1.size(); i++) {
+		ans = max(ans, res - dp1[i] + dp2[i + owo]);
+	}
+	if(ans < 0)
 		cout << "impossible\n";
 	else
-		cout << prv[l + O] + arr[m] << '\n';
+		cout << ans << '\n';
 }
