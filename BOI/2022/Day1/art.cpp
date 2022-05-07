@@ -39,40 +39,22 @@ void solve(int n) {
 	vector<int> arr(n);
 	for(int i = 0; i < n; i++)
 		arr[i] = i + 1;
-	shuffle(arr.begin(), arr.end(), mt19937(time(0)));
-	int x = publish(arr);
 
-	vector<int> res(n);
-	int lst = 0;
-	for(int i = 0; i + 1 < n; i++) {
-		swap(arr[i], arr[n - 1]);
-		int y = publish(arr);
-		res[i] = y;
-		if(y > x)
-			swap(arr[i], arr[n - 1]);
-		else {
-			res[i] = x;
-			x = y;
-			lst = i;
-		}
+	int lst = publish(arr);
+
+	// let a be count of numbers in the first i-1 numbers that are higher than a[i].
+	// let b be count of numbers in the first i-1 mumbers that are lower than a[i]
+	// then a + b = i and a - b = lst - cur - 1
+	// b = (i + cur - lst - 1) / 2
+	for(int i = 1; i < n; i++) {
+		for(int j = i; j; j--)
+			swap(arr[j - 1], arr[j]);
+		int cur = publish(arr);
+		int a = (i + lst - cur) / 2;
+		int b = (i + cur - lst) / 2;
+		for(int j = 1; j <= b; j++)
+			swap(arr[j - 1], arr[j]);
+		lst -= a;
 	}
-
-	vector<int> ans(n);
-	ans[n - 1] = arr[n - 1];
-	vector<int> cur;
-	for(int i = n - 2; ~i; i--)
-		cur.push_back(i);
-
-	for(int i = 0; i + 1 < n; i++) {
-		int y = res[i];
-		if(i < lst) {
-			swap(arr[i], arr[n - 1]);
-			y = publish(arr);
-			swap(arr[i], arr[n - 1]);
-		}
-		y = (y - x) / 2;
-		ans[cur[y]] = arr[i];
-		cur.erase(cur.begin() + y);
-	}
-	answer(ans);
+	answer(arr);
 }
